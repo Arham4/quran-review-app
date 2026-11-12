@@ -1,0 +1,21 @@
+services:
+  test:
+    build: .
+    volumes:
+      - .:/app
+      - gradle-cache:/root/.gradle
+      - android-cache:/opt/android-sdk
+    command: ./gradlew testDebugUnitTest --stacktrace
+
+  apk:
+    build: .
+    volumes:
+      - .:/app
+      - gradle-cache:/root/.gradle
+      - android-cache:/opt/android-sdk
+      - ./dist:/dist
+    command: sh -c "./gradlew assembleDebug --stacktrace && mkdir -p /dist && cp app/build/outputs/apk/debug/*.apk /dist/"
+
+volumes:
+  gradle-cache:
+  android-cache:

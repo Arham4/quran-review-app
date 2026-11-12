@@ -1,0 +1,13 @@
+.gradle/
+gradle-app/
+build/
+app/build/
+**/build/
+dist/
+.gradle
+local.properties
+.git/
+.gitignore
+.idea/
+*.iml
+.DS_Store
