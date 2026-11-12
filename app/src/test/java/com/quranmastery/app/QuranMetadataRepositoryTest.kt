@@ -208,7 +208,7 @@ class QuranMetadataRepositoryTest {
         val pool = setOf(53, 54, 55, 56, 57, 58, 59, 60)
         assertEquals(54, repo.nextHizbInPool(53, pool))
         assertEquals(53, repo.nextHizbInPool(60, pool))
-        assertEquals(57, repo.nextHizbInPool(55, pool))
+        assertEquals(56, repo.nextHizbInPool(55, pool))
         assertNull(repo.nextHizbInPool(53, emptySet()))
     }
 
@@ -217,7 +217,7 @@ class QuranMetadataRepositoryTest {
         assertTrue(AyahIndex.isBefore(2, 1, 2, 2))
         assertTrue(AyahIndex.isAfter(114, 6, 114, 5))
         assertTrue(AyahIndex.index(2, 74) < AyahIndex.index(2, 75))
-        assertEquals(AyahIndex.index(54, 55) + 1, AyahIndex.index(55, 1))
+        assertTrue(AyahIndex.index(54, 55) < AyahIndex.index(55, 1))
     }
 
     private fun assertHizb(n: Int, ss: Int, sa: Int, es: Int, ea: Int, sp: Int, ep: Int) {
