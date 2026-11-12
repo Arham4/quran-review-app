@@ -2,15 +2,10 @@ package com.quranmastery.app.ui.visual
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +17,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.quranmastery.app.ui.components.GoldCard
+import com.quranmastery.app.ui.components.GradeRow
+import com.quranmastery.app.ui.components.MadaniPrimaryButton
+import com.quranmastery.app.ui.components.MadaniScaffold
+import com.quranmastery.app.ui.components.MadaniSecondaryButton
 import com.quranmastery.app.ui.components.MadaniPageSchematic
+import com.quranmastery.app.ui.components.SectionHeader
 import kotlinx.coroutines.delay
 
 @Composable
@@ -32,10 +34,16 @@ fun VisualDrillScreen(onDone: () -> Unit) {
     var staring by remember { mutableStateOf(true) }
     var anchor by remember { mutableStateOf("") }
     var graded by remember { mutableStateOf("") }
-    val queue = remember { listOf("P562_TOP", "P562_MIDDLE", "P562_BOTTOM", "P563_TOP") }
+    val queue = remember {
+        listOf(
+            Triple("P562_TOP", 562, "TOP"),
+            Triple("P562_MIDDLE", 562, "MIDDLE"),
+            Triple("P562_BOTTOM", 562, "BOTTOM"),
+            Triple("P563_TOP", 563, "TOP")
+        )
+    }
 
-    val target = if (staring) 1f else 0f
-    val progress by animateFloatAsState(targetValue = target, label = "stare")
+    val progress by animateFloatAsState(targetValue = if (staring) 1f else 0f, label = "stare")
 
     LaunchedEffect(index) {
         staring = true
@@ -43,32 +51,66 @@ fun VisualDrillScreen(onDone: () -> Unit) {
         staring = false
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Visual Drill (${index + 1}/${queue.size})", style = MaterialTheme.typography.titleLarge)
-        Text("Card ${queue[index]}  |  look away and recall line positions")
-        if (staring) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CircularProgressIndicator(progress = { progress })
-                Text("2s stare ring — memorize the zone")
+    val (cardId, page, zone) = queue[index]
+
+    MadaniScaffold(title = "Visual Drill", onBack = onDone) {
+        GoldCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SectionHeader("Card ${index + 1} of ${queue.size}")
+                Text(
+                    cardId,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-        } else {
-            Text("Recall now: which lines hold the hard anchor?")
-        }
-        MadaniPageSchematic(pageNumber = 562 + (index / 3), zone = "TOP", hardLine = 3)
-        OutlinedTextField(value = anchor, onValueChange = { anchor = it }, label = { Text("Anchor notes") }, modifier = Modifier.fillMaxWidth())
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Again", "Hard", "Good", "Easy").forEach { g ->
-                OutlinedButton(onClick = { graded = g }, modifier = Modifier.weight(1f)) { Text(g) }
+            if (staring) {
+                Text("Stare at the $zone zone on your Mushaf…")
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Text(
+                    "Eyes closed — picture the zone, then grade yourself.",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
-        if (graded.isNotEmpty()) Text("Graded $graded for ${queue[index]}")
-        Button(
+
+        GoldCard(modifier = Modifier.fillMaxWidth()) {
+            MadaniPageSchematic(pageNumber = page, zone = zone, hardLine = 3)
+        }
+
+        OutlinedTextField(
+            value = anchor,
+            onValueChange = { anchor = it },
+            label = { Text("Anchor notes (line-start words, quirks)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = false
+        )
+
+        SectionHeader("Grade this card")
+        GradeRow(onGrade = { graded = it })
+        if (graded.isNotEmpty()) {
+            Text(
+                "Graded $graded for $cardId",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        MadaniPrimaryButton(
+            label = if (index < queue.lastIndex) "Next card" else "Finish drill",
             onClick = {
                 graded = ""
                 anchor = ""
                 if (index < queue.lastIndex) index++ else onDone()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(if (index < queue.lastIndex) "Next card" else "Finish") }
+            }
+        )
+        MadaniSecondaryButton(label = "Exit drill", onClick = onDone)
     }
 }

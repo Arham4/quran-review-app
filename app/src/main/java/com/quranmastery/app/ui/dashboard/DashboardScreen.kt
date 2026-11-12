@@ -3,29 +3,28 @@ package com.quranmastery.app.ui.dashboard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.quranmastery.app.ui.components.GoldCard
+import com.quranmastery.app.ui.components.MadaniChip
+import com.quranmastery.app.ui.components.MadaniPrimaryButton
+import com.quranmastery.app.ui.components.MadaniScaffold
+import com.quranmastery.app.ui.components.MadaniSecondaryButton
+import com.quranmastery.app.ui.components.MadaniTag
+import com.quranmastery.app.ui.components.SectionHeader
 
 @Composable
 fun DashboardScreen(
@@ -42,56 +41,106 @@ fun DashboardScreen(
     val hizbs = remember { (53..60).toList() }
     var selectedHizb by remember { mutableIntStateOf(57) }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Next Lesson Target", style = MaterialTheme.typography.titleMedium)
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(if (advance) "Hizb 58 (ADVANCE)" else "Hizb 57 (REPEAT)")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = advance, onClick = { advance = true }, label = { Text("Advance Hizb 58") })
-                    FilterChip(selected = !advance, onClick = { advance = false }, label = { Text("Repeat Hizb 57") })
-                }
-                Text("Sabak cursor: Surah 2 Ayah 34 (window 2:1-33 done)")
+    MadaniScaffold(title = "Quran Mastery") {
+        GoldCard(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                if (advance) "Hizb 58 · Advance" else "Hizb 57 · Repeat",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                if (advance) "Al-Jinn 72:1 – Al-Mursalat 77:50 · Pages 572–581"
+                else "Al-Mulk 67:1 – Nuh 71:28 · Pages 562–571",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                MadaniChip(selected = advance, label = "Advance Hizb 58", onClick = { advance = true })
+                MadaniChip(selected = !advance, label = "Repeat Hizb 57", onClick = { advance = false })
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Daily FSRS due", style = MaterialTheme.typography.titleMedium)
-                Text("Visual due: $visualDue   Tafseer due: $tafseerDue")
-            }
+        GoldCard(modifier = Modifier.fillMaxWidth()) {
+            SectionHeader("Sabak · New Memorization")
+            Text(
+                "Next up: Al-Baqarah 2:34 (Page 6, Line 10)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                "Memorized: 2:1–33 · Pages 2–6",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
-        Text("Hizb rotation ribbon 53-60", style = MaterialTheme.typography.titleMedium)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(hizbs) { h ->
-                FilterChip(
-                    selected = h == selectedHizb,
-                    onClick = { selectedHizb = h },
-                    label = { Text("H$h") }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            GoldCard(modifier = Modifier.weight(1f)) {
+                SectionHeader("Visual due")
+                Text(
+                    "$visualDue",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+            GoldCard(modifier = Modifier.weight(1f)) {
+                SectionHeader("Tafseer due")
+                Text(
+                    "$tafseerDue",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }
 
-        Text("Fuzzy flags (quick chips)", style = MaterialTheme.typography.titleMedium)
+        SectionHeader("Hizb rotation · 53–60")
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(fuzzyPages) { p ->
-                AssistChip(onClick = { fuzzyPages.remove(p) }, label = { Text("P$p tap to clear") })
+            items(hizbs) { h ->
+                MadaniChip(
+                    selected = h == selectedHizb,
+                    label = "H$h",
+                    onClick = { selectedHizb = h }
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
-        Button(onClick = onPostLesson, modifier = Modifier.fillMaxWidth()) { Text("Log Lesson") }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onVisual, modifier = Modifier.weight(1f)) { Text("Visual Drill") }
-            OutlinedButton(onClick = onTafseer, modifier = Modifier.weight(1f)) { Text("Tafseer") }
+        if (fuzzyPages.isNotEmpty()) {
+            SectionHeader("Fuzzy pages · tap to clear")
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(fuzzyPages.toList()) { p ->
+                    MadaniTag(label = "Page $p", onRemove = { fuzzyPages.remove(p) })
+                }
+            }
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onPromotion, modifier = Modifier.weight(1f)) { Text("Promotion") }
-            OutlinedButton(onClick = onBackup, modifier = Modifier.weight(1f)) { Text("Backup") }
+
+        MadaniPrimaryButton(label = "Log Lesson", onClick = onPostLesson)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                MadaniSecondaryButton(label = "Visual Drill", onClick = onVisual)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                MadaniSecondaryButton(label = "Tafseer", onClick = onTafseer)
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                MadaniSecondaryButton(label = "Promotion", onClick = onPromotion)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                MadaniSecondaryButton(label = "Backup", onClick = onBackup)
+            }
         }
     }
 }

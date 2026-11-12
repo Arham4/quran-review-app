@@ -36,9 +36,11 @@ fun MadaniPageSchematic(
     ) {
         val w = size.width
         val h = size.height
+        val pageBg = scheme.surfaceVariant
+        val faintBar = scheme.onSurfaceVariant.copy(alpha = 0.55f)
         // Page background
         drawRoundRect(
-            color = Color(0x22FFFFFF),
+            color = pageBg,
             topLeft = Offset(8f, 8f),
             size = Size(w - 16f, h - 16f),
             cornerRadius = CornerRadius(24f, 24f)
@@ -68,7 +70,7 @@ fun MadaniPageSchematic(
                 "MIDDLE" -> i in 6..10
                 else -> i in 11..15
             }
-            val barColor = if (i == hardLine) Color(0xFFE5484D) else if (inZone) zoneColor else Color(0xFF8A9A90)
+            val barColor = if (i == hardLine) Color(0xFFE5484D) else if (inZone) zoneColor else faintBar
             // Surah header bars: lines 1-2 drawn shorter/centered when enabled
             val isHeader = showSurahHeader && (i == 1 || i == 2)
             val barW = if (isHeader) w * 0.5f else w - 64f

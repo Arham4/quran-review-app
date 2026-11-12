@@ -1,15 +1,10 @@
 package com.quranmastery.app.ui.tafseer
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,54 +12,87 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.quranmastery.app.ui.components.GoldCard
+import com.quranmastery.app.ui.components.GradeRow
+import com.quranmastery.app.ui.components.MadaniPrimaryButton
+import com.quranmastery.app.ui.components.MadaniScaffold
+import com.quranmastery.app.ui.components.MadaniSecondaryButton
+import com.quranmastery.app.ui.components.SectionHeader
 
 @Composable
 fun TafseerRecallScreen(onDone: () -> Unit) {
     var index by remember { mutableIntStateOf(0) }
     var revealed by remember { mutableStateOf(false) }
+    var graded by remember { mutableStateOf("") }
     val cards = remember {
         listOf(
-            Triple("Surah 51:1-10", "P520 H53", "Adh-Dhariyat opening theme"),
-            Triple("Surah 55:1-16", "P533 H55", "Ar-Rahman blessings theme"),
-            Triple("Surah 57:1-10", "P545 H57", "Al-Hadid charity theme")
+            Triple("Surah 51:1-10", "P520 · H53", "Adh-Dhariyat opening theme"),
+            Triple("Surah 55:1-16", "P533 · H55", "Ar-Rahman blessings theme"),
+            Triple("Surah 57:1-10", "P545 · H57", "Al-Hadid charity theme")
         )
     }
     val (ref, loc, theme) = cards[index % cards.size]
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Tafseer Recall", style = MaterialTheme.typography.titleLarge)
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(ref, style = MaterialTheme.typography.titleMedium)
-                Text("$loc  |  $theme")
-                if (revealed) {
-                    Text("- Bullet 1: main point of passage")
-                    Text("- Bullet 2: link to next passage")
-                    Text("- Bullet 3: action point")
-                } else {
-                    Text("Front only — recall bullets, then reveal.")
+    MadaniScaffold(title = "Tafseer Recall", onBack = onDone) {
+        GoldCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SectionHeader("Cluster ${index % cards.size + 1} of ${cards.size}")
+                Text(loc, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            }
+            Text(
+                ref,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                theme,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            AnimatedVisibility(visible = revealed) {
+                androidx.compose.foundation.layout.Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text("• Main point of the passage")
+                    Text("• Link to the next passage")
+                    Text("• Action point for memorization")
                 }
             }
-        }
-        Button(onClick = { revealed = !revealed }, modifier = Modifier.fillMaxWidth()) {
-            Text(if (revealed) "Hide" else "Reveal bullets")
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Again", "Hard", "Good", "Easy").forEach { g ->
-                OutlinedButton(
-                    onClick = {
-                        revealed = false
-                        if (index < 20) index++
-                    },
-                    modifier = Modifier.weight(1f)
-                ) { Text(g) }
+            if (!revealed) {
+                Text(
+                    "Recall the bullets first, then reveal.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-        OutlinedButton(onClick = { /* import/edit placeholder */ }, modifier = Modifier.fillMaxWidth()) {
-            Text("Import / Edit clusters (placeholder)")
+
+        MadaniPrimaryButton(
+            label = if (revealed) "Hide bullets" else "Reveal bullets",
+            onClick = { revealed = !revealed }
+        )
+
+        SectionHeader("Grade this cluster")
+        GradeRow(onGrade = {
+            graded = it
+            revealed = false
+            if (index < 20) index++
+        })
+        if (graded.isNotEmpty()) {
+            Text(
+                "Graded $graded",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        OutlinedButton(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text("Done") }
+        MadaniSecondaryButton(label = "Import / edit clusters (soon)", onClick = { })
+        MadaniSecondaryButton(label = "Back to dashboard", onClick = onDone)
     }
 }
